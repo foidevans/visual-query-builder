@@ -7,14 +7,10 @@ export const metadata: Metadata = {
   description: "Build complex queries visually",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className="antialiased">
+    <html lang="en" className="dark" suppressHydrationWarning>
+      <body className="antialiased bg-background text-foreground">
         <TooltipProvider>{children}</TooltipProvider>
       </body>
     </html>
