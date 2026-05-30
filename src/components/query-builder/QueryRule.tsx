@@ -1,7 +1,7 @@
 "use client";
 
 import React, { memo } from "react";
-import { X, GripVertical } from "lucide-react";
+import { X, GripVertical, AlertCircle } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,7 +12,6 @@ import { getOperatorsForType, getOperatorDefinition } from "@/lib/operators";
 import { FieldSchema, QueryRule as QueryRuleType } from "@/types/query";
 import { useValidation } from "@/hooks/useValidation";
 import { cn } from "@/lib/utils";
-import { AlertCircle } from "lucide-react";
 
 interface QueryRuleProps {
   rule: QueryRuleType;
@@ -21,7 +20,15 @@ interface QueryRuleProps {
   isOnly: boolean;
 }
 
-function ValueInput({ rule, field }: { rule: QueryRuleType; field: FieldSchema | undefined }) {
+function ValueInput({
+  rule,
+  field,
+  onTouch,
+}: {
+  rule: QueryRuleType;
+  field: FieldSchema | undefined;
+  onTouch: () => void;
+}) {
   const updateRule = useQueryStore((s) => s.updateRule);
   const opDef = getOperatorDefinition(rule.operator);
 
@@ -31,7 +38,7 @@ function ValueInput({ rule, field }: { rule: QueryRuleType; field: FieldSchema |
     return (
       <Select
         value={typeof rule.value === "string" ? rule.value : ""}
-        onValueChange={(val) => updateRule(rule.id, { value: val })}
+        onValueChange={(val) => { onTouch(); updateRule(rule.id, { value: val }); }}
       >
         <SelectTrigger className="h-8 w-36 text-xs">
           <SelectValue placeholder="Select value" />
@@ -49,7 +56,7 @@ function ValueInput({ rule, field }: { rule: QueryRuleType; field: FieldSchema |
     return (
       <Select
         value={typeof rule.value === "string" ? rule.value : ""}
-        onValueChange={(val) => updateRule(rule.id, { value: val })}
+        onValueChange={(val) => { onTouch(); updateRule(rule.id, { value: val }); }}
       >
         <SelectTrigger className="h-8 w-36 text-xs">
           <SelectValue placeholder="Select" />
@@ -70,7 +77,7 @@ function ValueInput({ rule, field }: { rule: QueryRuleType; field: FieldSchema |
           className="h-8 w-24 text-xs"
           type={field.type === "date" ? "date" : "number"}
           value={vals[0]}
-          onChange={(e) => updateRule(rule.id, { value: [e.target.value, vals[1]] })}
+          onChange={(e) => { onTouch(); updateRule(rule.id, { value: [e.target.value, vals[1]] }); }}
           placeholder="From"
         />
         <span className="text-xs text-muted-foreground">and</span>
@@ -78,7 +85,7 @@ function ValueInput({ rule, field }: { rule: QueryRuleType; field: FieldSchema |
           className="h-8 w-24 text-xs"
           type={field.type === "date" ? "date" : "number"}
           value={vals[1]}
-          onChange={(e) => updateRule(rule.id, { value: [vals[0], e.target.value] })}
+          onChange={(e) => { onTouch(); updateRule(rule.id, { value: [vals[0], e.target.value] }); }}
           placeholder="To"
         />
       </div>
@@ -90,11 +97,12 @@ function ValueInput({ rule, field }: { rule: QueryRuleType; field: FieldSchema |
       <Input
         className="h-8 w-48 text-xs"
         value={Array.isArray(rule.value) ? (rule.value as string[]).join(", ") : (rule.value as string) ?? ""}
-        onChange={(e) =>
+        onChange={(e) => {
+          onTouch();
           updateRule(rule.id, {
             value: e.target.value.split(",").map((v) => v.trim()).filter(Boolean),
-          })
-        }
+          });
+        }}
         placeholder="val1, val2, val3"
       />
     );
@@ -105,7 +113,7 @@ function ValueInput({ rule, field }: { rule: QueryRuleType; field: FieldSchema |
       className="h-8 w-40 text-xs"
       type={field.type === "number" ? "number" : field.type === "date" ? "date" : "text"}
       value={typeof rule.value === "string" ? rule.value : ""}
-      onChange={(e) => updateRule(rule.id, { value: e.target.value })}
+      onChange={(e) => { onTouch(); updateRule(rule.id, { value: e.target.value }); }}
       placeholder="Enter value..."
     />
   );
@@ -114,7 +122,7 @@ function ValueInput({ rule, field }: { rule: QueryRuleType; field: FieldSchema |
 export const QueryRule = memo(function QueryRule({ rule, fields, groupId: _groupId, isOnly }: QueryRuleProps) {
   const updateRule = useQueryStore((s) => s.updateRule);
   const removeNode = useQueryStore((s) => s.removeNode);
-  const { getErrorForNode } = useValidation();
+  const { getErrorForNode, touchNode } = useValidation();
   const error = getErrorForNode(rule.id);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
@@ -133,6 +141,7 @@ export const QueryRule = memo(function QueryRule({ rule, fields, groupId: _group
     const newField = fields.find((f) => f.name === fieldName);
     if (!newField) return;
     const ops = getOperatorsForType(newField.type);
+    touchNode(rule.id);
     updateRule(rule.id, {
       field: fieldName,
       operator: ops[0]?.value ?? "equals",
@@ -148,7 +157,6 @@ export const QueryRule = memo(function QueryRule({ rule, fields, groupId: _group
           error ? "border-rose-500/60 bg-rose-500/5" : "border-border"
         )}
       >
-        {/* Drag handle */}
         <button
           {...attributes}
           {...listeners}
@@ -158,9 +166,8 @@ export const QueryRule = memo(function QueryRule({ rule, fields, groupId: _group
           <GripVertical size={14} />
         </button>
 
-        {/* Field selector */}
         <Select value={rule.field} onValueChange={handleFieldChange}>
-          <SelectTrigger className={cn("h-8 w-36 text-xs", error && !rule.field && "border-rose-500/60")}>
+          <SelectTrigger className="h-8 w-36 text-xs">
             <SelectValue placeholder="Select field" />
           </SelectTrigger>
           <SelectContent>
@@ -170,10 +177,12 @@ export const QueryRule = memo(function QueryRule({ rule, fields, groupId: _group
           </SelectContent>
         </Select>
 
-        {/* Operator selector */}
         <Select
           value={rule.operator}
-          onValueChange={(val) => updateRule(rule.id, { operator: val as QueryRuleType["operator"], value: "" })}
+          onValueChange={(val) => {
+            touchNode(rule.id);
+            updateRule(rule.id, { operator: val as QueryRuleType["operator"], value: "" });
+          }}
           disabled={!selectedField}
         >
           <SelectTrigger className="h-8 w-40 text-xs">
@@ -186,10 +195,8 @@ export const QueryRule = memo(function QueryRule({ rule, fields, groupId: _group
           </SelectContent>
         </Select>
 
-        {/* Value input */}
-        <ValueInput rule={rule} field={selectedField} />
+        <ValueInput rule={rule} field={selectedField} onTouch={() => touchNode(rule.id)} />
 
-        {/* Remove button */}
         <Button
           variant="ghost"
           size="icon"
@@ -202,7 +209,6 @@ export const QueryRule = memo(function QueryRule({ rule, fields, groupId: _group
         </Button>
       </div>
 
-      {/* Inline error message */}
       {error && (
         <div className="flex items-center gap-1.5 px-2 text-rose-400 text-xs">
           <AlertCircle size={11} />
