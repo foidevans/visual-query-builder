@@ -1,24 +1,11 @@
 "use client";
 
 import React, { memo } from "react";
-import {
-  DndContext,
-  closestCenter,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  DragEndEvent,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  sortableKeyboardCoordinates,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
 import { ChevronDown, ChevronRight, Plus, Trash2, FolderPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { QueryRule } from "./QueryRule";
+import { SortableGroup } from "./SortableGroup";
 import { useQueryStore } from "@/store/queryStore";
 import { QueryGroup as QueryGroupType, QueryNode, FieldSchema } from "@/types/query";
 import { cn } from "@/lib/utils";
@@ -44,13 +31,7 @@ export const QueryGroup = memo(function QueryGroup({
     removeNode,
     toggleLogicalOperator,
     toggleGroupCollapsed,
-    reorderChildren,
   } = useQueryStore();
-
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
-  );
 
   const depthColors = [
     "border-blue-500/40 bg-blue-500/5",
@@ -66,28 +47,12 @@ export const QueryGroup = memo(function QueryGroup({
   };
 
   const borderColor = depthColors[depth % depthColors.length];
-
-  function handleDragEnd(event: DragEndEvent) {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
-
-    const fromIndex = group.children.findIndex((c) => c.id === active.id);
-    const toIndex = group.children.findIndex((c) => c.id === over.id);
-    if (fromIndex !== -1 && toIndex !== -1) {
-      reorderChildren(group.id, fromIndex, toIndex);
-    }
-  }
-
   const childIds = group.children.map((c) => c.id);
   const isOnly = group.children.length === 1;
 
   return (
-    <div
-      className={cn(
-        "rounded-lg border-2 p-3 space-y-2 transition-all duration-200",
-        borderColor
-      )}
-    >
+    <div className={cn("rounded-lg border-2 p-3 space-y-2 transition-all duration-200", borderColor)}>
+      {/* Group header */}
       <div className="flex items-center gap-2 flex-wrap">
         <button
           onClick={() => toggleGroupCollapsed(group.id)}
@@ -104,15 +69,12 @@ export const QueryGroup = memo(function QueryGroup({
             logicalBadgeColors[group.logicalOperator]
           )}
           onClick={() => toggleLogicalOperator(group.id)}
-          aria-label="Toggle AND/OR"
         >
           {group.logicalOperator}
         </Badge>
 
         {depth > 0 && (
-          <span className="text-xs text-muted-foreground">
-            Nested group · depth {depth}
-          </span>
+          <span className="text-xs text-muted-foreground">Nested group · depth {depth}</span>
         )}
 
         {isRoot && (
@@ -159,54 +121,46 @@ export const QueryGroup = memo(function QueryGroup({
         </div>
       </div>
 
+      {/* Children */}
       {!group.collapsed && (
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext items={childIds} strategy={verticalListSortingStrategy}>
-            <div className="space-y-2 pl-2">
-              {group.children.map((child: QueryNode, index: number) => (
-                <div key={child.id} className="relative">
-                  {/* Connector line + logical operator label */}
-                  {index > 0 && (
-                    <div className="flex items-center gap-2 my-1 pl-1">
-                      <div className="h-px flex-1 bg-border" />
-                      <span
-                        className={cn(
-                          "text-xs font-semibold px-1.5 py-0.5 rounded",
-                          group.logicalOperator === "AND"
-                            ? "text-blue-400 bg-blue-500/10"
-                            : "text-violet-400 bg-violet-500/10"
-                        )}
-                      >
-                        {group.logicalOperator}
-                      </span>
-                      <div className="h-px flex-1 bg-border" />
-                    </div>
-                  )}
-
-                  {child.type === "rule" ? (
-                    <QueryRule
-                      rule={child}
-                      fields={fields}
-                      groupId={group.id}
-                      isOnly={isOnly}
-                    />
-                  ) : (
-                    <QueryGroup
-                      group={child}
-                      fields={fields}
-                      depth={depth + 1}
-                      parentHasOneChild={isOnly}
-                    />
-                  )}
+        <SortableGroup groupId={group.id} childIds={childIds}>
+          {group.children.map((child: QueryNode, index: number) => (
+            <div key={child.id} className="relative">
+              {index > 0 && (
+                <div className="flex items-center gap-2 my-1 pl-1">
+                  <div className="h-px flex-1 bg-border" />
+                  <span
+                    className={cn(
+                      "text-xs font-semibold px-1.5 py-0.5 rounded",
+                      group.logicalOperator === "AND"
+                        ? "text-blue-400 bg-blue-500/10"
+                        : "text-violet-400 bg-violet-500/10"
+                    )}
+                  >
+                    {group.logicalOperator}
+                  </span>
+                  <div className="h-px flex-1 bg-border" />
                 </div>
-              ))}
+              )}
+
+              {child.type === "rule" ? (
+                <QueryRule
+                  rule={child}
+                  fields={fields}
+                  groupId={group.id}
+                  isOnly={isOnly}
+                />
+              ) : (
+                <QueryGroup
+                  group={child}
+                  fields={fields}
+                  depth={depth + 1}
+                  parentHasOneChild={isOnly}
+                />
+              )}
             </div>
-          </SortableContext>
-        </DndContext>
+          ))}
+        </SortableGroup>
       )}
     </div>
   );

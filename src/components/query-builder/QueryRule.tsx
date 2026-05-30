@@ -10,6 +10,9 @@ import { Button } from "@/components/ui/button";
 import { useQueryStore } from "@/store/queryStore";
 import { getOperatorsForType, getOperatorDefinition } from "@/lib/operators";
 import { FieldSchema, QueryRule as QueryRuleType } from "@/types/query";
+import { useValidation } from "@/hooks/useValidation";
+import { cn } from "@/lib/utils";
+import { AlertCircle } from "lucide-react";
 
 interface QueryRuleProps {
   rule: QueryRuleType;
@@ -22,9 +25,7 @@ function ValueInput({ rule, field }: { rule: QueryRuleType; field: FieldSchema |
   const updateRule = useQueryStore((s) => s.updateRule);
   const opDef = getOperatorDefinition(rule.operator);
 
-  if (!opDef || opDef.valueCount === 0) return null;
-
-  if (!field) return null;
+  if (!opDef || opDef.valueCount === 0 || !field) return null;
 
   if (field.type === "enum" && field.enumValues) {
     return (
@@ -113,6 +114,8 @@ function ValueInput({ rule, field }: { rule: QueryRuleType; field: FieldSchema |
 export const QueryRule = memo(function QueryRule({ rule, fields, groupId: _groupId, isOnly }: QueryRuleProps) {
   const updateRule = useQueryStore((s) => s.updateRule);
   const removeNode = useQueryStore((s) => s.removeNode);
+  const { getErrorForNode } = useValidation();
+  const error = getErrorForNode(rule.id);
 
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: rule.id });
@@ -124,9 +127,7 @@ export const QueryRule = memo(function QueryRule({ rule, fields, groupId: _group
   };
 
   const selectedField = fields.find((f) => f.name === rule.field);
-  const availableOperators = selectedField
-    ? getOperatorsForType(selectedField.type)
-    : [];
+  const availableOperators = selectedField ? getOperatorsForType(selectedField.type) : [];
 
   function handleFieldChange(fieldName: string) {
     const newField = fields.find((f) => f.name === fieldName);
@@ -140,65 +141,74 @@ export const QueryRule = memo(function QueryRule({ rule, fields, groupId: _group
   }
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      className="flex items-center gap-2 p-2 rounded-md bg-background border border-border group"
-    >
-      {/* Drag handle */}
-      <button
-        {...attributes}
-        {...listeners}
-        className="cursor-grab text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
-        aria-label="Drag to reorder"
+    <div ref={setNodeRef} style={style} className="space-y-1">
+      <div
+        className={cn(
+          "flex items-center gap-2 p-2 rounded-md bg-background border group transition-colors",
+          error ? "border-rose-500/60 bg-rose-500/5" : "border-border"
+        )}
       >
-        <GripVertical size={14} />
-      </button>
+        {/* Drag handle */}
+        <button
+          {...attributes}
+          {...listeners}
+          className="cursor-grab text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity"
+          aria-label="Drag to reorder"
+        >
+          <GripVertical size={14} />
+        </button>
 
-      <Select value={rule.field} onValueChange={handleFieldChange}>
-        <SelectTrigger className="h-8 w-36 text-xs">
-          <SelectValue placeholder="Select field" />
-        </SelectTrigger>
-        <SelectContent>
-          {fields.map((f) => (
-            <SelectItem key={f.name} value={f.name} className="text-xs">
-              {f.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        {/* Field selector */}
+        <Select value={rule.field} onValueChange={handleFieldChange}>
+          <SelectTrigger className={cn("h-8 w-36 text-xs", error && !rule.field && "border-rose-500/60")}>
+            <SelectValue placeholder="Select field" />
+          </SelectTrigger>
+          <SelectContent>
+            {fields.map((f) => (
+              <SelectItem key={f.name} value={f.name} className="text-xs">{f.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-      <Select
-        value={rule.operator}
-        onValueChange={(val) =>
-          updateRule(rule.id, { operator: val as QueryRuleType["operator"], value: "" })
-        }
-        disabled={!selectedField}
-      >
-        <SelectTrigger className="h-8 w-40 text-xs">
-          <SelectValue placeholder="Operator" />
-        </SelectTrigger>
-        <SelectContent>
-          {availableOperators.map((op) => (
-            <SelectItem key={op.value} value={op.value} className="text-xs">
-              {op.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+        {/* Operator selector */}
+        <Select
+          value={rule.operator}
+          onValueChange={(val) => updateRule(rule.id, { operator: val as QueryRuleType["operator"], value: "" })}
+          disabled={!selectedField}
+        >
+          <SelectTrigger className="h-8 w-40 text-xs">
+            <SelectValue placeholder="Operator" />
+          </SelectTrigger>
+          <SelectContent>
+            {availableOperators.map((op) => (
+              <SelectItem key={op.value} value={op.value} className="text-xs">{op.label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
 
-      <ValueInput rule={rule} field={selectedField} />
+        {/* Value input */}
+        <ValueInput rule={rule} field={selectedField} />
 
-      <Button
-        variant="ghost"
-        size="icon"
-        className="h-7 w-7 ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
-        onClick={() => removeNode(rule.id)}
-        disabled={isOnly}
-        aria-label="Remove rule"
-      >
-        <X size={13} />
-      </Button>
+        {/* Remove button */}
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-7 w-7 ml-auto opacity-0 group-hover:opacity-100 transition-opacity text-muted-foreground hover:text-destructive"
+          onClick={() => removeNode(rule.id)}
+          disabled={isOnly}
+          aria-label="Remove rule"
+        >
+          <X size={13} />
+        </Button>
+      </div>
+
+      {/* Inline error message */}
+      {error && (
+        <div className="flex items-center gap-1.5 px-2 text-rose-400 text-xs">
+          <AlertCircle size={11} />
+          <span>{error}</span>
+        </div>
+      )}
     </div>
   );
 });
