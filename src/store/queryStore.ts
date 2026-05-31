@@ -1,14 +1,8 @@
 import { create } from "zustand";
 import { devtools, persist } from "zustand/middleware";
 import {
-  QueryGroup,
-  QueryNode,
-  QueryRule,
-  LogicalOperator,
-  Operator,
-  QueryPreset,
-  QueryHistoryEntry,
-  QueryResult,
+  QueryGroup, QueryNode, QueryRule, LogicalOperator,
+  Operator, QueryPreset, QueryHistoryEntry, QueryResult,
 } from "@/types/query";
 
 export function createRule(field: string = "", operator: Operator = "equals"): QueryRule {
@@ -36,6 +30,7 @@ interface QueryStore {
   addRule: (groupId: string) => void;
   updateRule: (ruleId: string, updates: Partial<Omit<QueryRule, "id" | "type">>) => void;
   removeNode: (nodeId: string) => void;
+  removeLastRule: () => void;
   addGroup: (parentGroupId: string) => void;
   toggleLogicalOperator: (groupId: string) => void;
   toggleGroupCollapsed: (groupId: string) => void;
@@ -95,6 +90,13 @@ function reorderInGroup(group: QueryGroup, targetGroupId: string, fromIndex: num
   };
 }
 
+// Find the last rule node id in the root group (not nested)
+function getLastRootRuleId(group: QueryGroup): string | null {
+  const rules = group.children.filter((c) => c.type === "rule");
+  if (rules.length <= 1) return null; // never remove the last remaining rule
+  return rules[rules.length - 1].id;
+}
+
 const initialRootGroup = createGroup("AND");
 
 export const useQueryStore = create<QueryStore>()(
@@ -120,6 +122,13 @@ export const useQueryStore = create<QueryStore>()(
 
         removeNode: (nodeId) =>
           set((state) => ({ rootGroup: removeNodeFromTree(state.rootGroup, nodeId) })),
+
+        removeLastRule: () => {
+          const { rootGroup } = get();
+          const lastRuleId = getLastRootRuleId(rootGroup);
+          if (!lastRuleId) return;
+          set((state) => ({ rootGroup: removeNodeFromTree(state.rootGroup, lastRuleId) }));
+        },
 
         addGroup: (parentGroupId) =>
           set((state) => ({ rootGroup: addToGroup(state.rootGroup, parentGroupId, createGroup()) })),

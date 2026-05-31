@@ -19,25 +19,22 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useQueryStore } from "@/store/queryStore";
 import { useValidation } from "@/hooks/useValidation";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
+import { KeyboardShortcuts } from "./KeyboardShortcuts";
 import { QueryGroup } from "@/types/query";
 
 export function QueryToolbar() {
   const {
-    resetQuery,
-    savePreset,
-    loadPreset,
-    deletePreset,
-    importQuery,
-    rootGroup,
-    selectedSchema,
-    presets,
-    history,
+    resetQuery, savePreset, loadPreset, deletePreset,
+    importQuery, rootGroup, selectedSchema, presets, history,
   } = useQueryStore();
 
-  const { valid, errors } = useValidation();
+  const { valid, visibleErrorCount } = useValidation();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [presetName, setPresetName] = useState("");
   const [showPresetInput, setShowPresetInput] = useState(false);
+
+  useKeyboardShortcuts();
 
   function handleExport() {
     const payload = { query: rootGroup, schemaName: selectedSchema };
@@ -77,48 +74,32 @@ export function QueryToolbar() {
 
   return (
     <div className="flex items-center gap-2 px-4 py-2 border-b border-border flex-wrap">
-      <div className="flex items-center gap-1.5">
-        {valid ? (
-          <Badge variant="outline" className="text-xs gap-1 text-emerald-400 border-emerald-400/30 bg-emerald-400/10">
-            <CheckCircle2 size={10} />
-            Valid
-          </Badge>
-        ) : (
-          <Badge variant="outline" className="text-xs gap-1 text-rose-400 border-rose-400/30 bg-rose-400/10">
-            <AlertCircle size={10} />
-            {errors.length} error{errors.length !== 1 ? "s" : ""}
-          </Badge>
-        )}
-      </div>
+      {/* Validation status */}
+      {valid ? (
+        <Badge variant="outline" className="text-xs gap-1 text-emerald-400 border-emerald-400/30 bg-emerald-400/10">
+          <CheckCircle2 size={10} />
+          Valid
+        </Badge>
+      ) : (
+        <Badge variant="outline" className="text-xs gap-1 text-rose-400 border-rose-400/30 bg-rose-400/10">
+          <AlertCircle size={10} />
+          {visibleErrorCount > 0 ? `${visibleErrorCount} error${visibleErrorCount !== 1 ? "s" : ""}` : "Invalid"}
+        </Badge>
+      )}
 
       <Separator orientation="vertical" className="h-5" />
 
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-7 text-xs gap-1 text-muted-foreground"
-        onClick={resetQuery}
-      >
+      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground" onClick={resetQuery}>
         <RotateCcw size={12} />
         Reset
       </Button>
 
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-7 text-xs gap-1 text-muted-foreground"
-        onClick={handleExport}
-      >
+      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground" onClick={handleExport}>
         <Download size={12} />
         Export
       </Button>
 
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-7 text-xs gap-1 text-muted-foreground"
-        onClick={() => fileInputRef.current?.click()}
-      >
+      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground" onClick={() => fileInputRef.current?.click()}>
         <Upload size={12} />
         Import
       </Button>
@@ -137,17 +118,10 @@ export function QueryToolbar() {
               if (e.key === "Escape") setShowPresetInput(false);
             }}
           />
-          <Button size="sm" className="h-7 text-xs" onClick={handleSavePreset}>
-            Save
-          </Button>
+          <Button size="sm" className="h-7 text-xs" onClick={handleSavePreset}>Save</Button>
         </div>
       ) : (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 text-xs gap-1 text-muted-foreground"
-          onClick={() => setShowPresetInput(true)}
-        >
+        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground" onClick={() => setShowPresetInput(true)}>
           <Save size={12} />
           Save Preset
         </Button>
@@ -158,8 +132,7 @@ export function QueryToolbar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground">
               <BookMarked size={12} />
-              Presets
-              <ChevronDown size={10} />
+              Presets <ChevronDown size={10} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56">
@@ -168,10 +141,7 @@ export function QueryToolbar() {
             <ScrollArea className="max-h-48">
               {presets.map((preset) => (
                 <DropdownMenuItem key={preset.id} className="flex items-center justify-between group">
-                  <button
-                    className="text-xs flex-1 text-left"
-                    onClick={() => loadPreset(preset.id)}
-                  >
+                  <button className="text-xs flex-1 text-left" onClick={() => loadPreset(preset.id)}>
                     {preset.name}
                     <span className="block text-muted-foreground text-[10px]">{preset.schemaName}</span>
                   </button>
@@ -193,8 +163,7 @@ export function QueryToolbar() {
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground">
               <History size={12} />
-              History
-              <ChevronDown size={10} />
+              History <ChevronDown size={10} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-64">
@@ -217,6 +186,10 @@ export function QueryToolbar() {
           </DropdownMenuContent>
         </DropdownMenu>
       )}
+
+      <div className="ml-auto">
+        <KeyboardShortcuts />
+      </div>
     </div>
   );
 }
