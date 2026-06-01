@@ -2,16 +2,14 @@
 
 import React, { useState, useMemo } from "react";
 import { Copy, Check } from "lucide-react";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { generateSQL, generateMongo } from "@/lib/queryGenerator";
 import { useQueryStore } from "@/store/queryStore";
 
 export function QueryPreview() {
   const rootGroup = useQueryStore((s) => s.rootGroup);
   const [copied, setCopied] = useState(false);
-  const [activeTab, setActiveTab] = useState("sql");
+  const [activeTab, setActiveTab] = useState<"sql" | "mongo">("sql");
 
   const sql = useMemo(() => generateSQL(rootGroup), [rootGroup]);
   const mongo = useMemo(() => generateMongo(rootGroup), [rootGroup]);
@@ -25,46 +23,65 @@ export function QueryPreview() {
   }
 
   return (
-    <div className="rounded-lg border border-border bg-card h-full flex flex-col">
-      <div className="flex items-center justify-between px-4 py-2 border-b border-border">
-        <span className="text-sm font-medium">Query Preview</span>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 gap-1 text-xs text-muted-foreground"
-          onClick={handleCopy}
-        >
-          {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
-          {copied ? "Copied!" : "Copy"}
-        </Button>
+    <div className="flex flex-col h-full rounded"
+      style={{ background: "var(--surface)", border: "1px solid var(--border)" }}>
+
+      <div className="flex items-center justify-between px-3 py-2 shrink-0"
+        style={{ borderBottom: "1px solid var(--border)" }}>
+        <div className="flex items-center gap-1">
+          <span style={{
+            fontSize: 12, fontWeight: 600,
+            color: "var(--foreground)", letterSpacing: "0.02em"
+          }}>
+            QUERY PREVIEW
+          </span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex rounded overflow-hidden"
+            style={{ border: "1px solid var(--border)" }}>
+            {(["sql", "mongo"] as const).map((tab) => (
+              <button key={tab} onClick={() => setActiveTab(tab)}
+                style={{
+                  padding: "2px 10px",
+                  fontSize: 11,
+                  fontWeight: 500,
+                  fontFamily: "var(--font-jetbrains), monospace",
+                  background: activeTab === tab ? "var(--primary)" : "transparent",
+                  color: activeTab === tab ? "#fff" : "var(--muted-foreground)",
+                  border: "none",
+                  cursor: "pointer",
+                  transition: "background 150ms",
+                  textTransform: "uppercase",
+                }}>
+                {tab}
+              </button>
+            ))}
+          </div>
+          <Button variant="ghost" size="sm" className="h-6 gap-1 px-2"
+            style={{ fontSize: 11, color: "var(--muted-foreground)" }}
+            onClick={handleCopy}>
+            {copied
+              ? <><Check size={11} style={{ color: "var(--success)" }} /> Copied</>
+              : <><Copy size={11} /> Copy</>
+            }
+          </Button>
+        </div>
       </div>
 
-      <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col flex-1">
-        <TabsList className="w-full rounded-none border-b border-border bg-transparent justify-start px-4 gap-2 h-9">
-          <TabsTrigger value="sql" className="text-xs h-7 data-[state=active]:bg-muted">
-            SQL
-          </TabsTrigger>
-          <TabsTrigger value="mongo" className="text-xs h-7 data-[state=active]:bg-muted">
-            MongoDB
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="sql" className="flex-1 m-0">
-          <ScrollArea className="h-full">
-            <pre className="p-4 text-xs font-mono text-emerald-400 whitespace-pre-wrap leading-relaxed">
-              {sql}
-            </pre>
-          </ScrollArea>
-        </TabsContent>
-
-        <TabsContent value="mongo" className="flex-1 m-0">
-          <ScrollArea className="h-full">
-            <pre className="p-4 text-xs font-mono text-violet-400 whitespace-pre-wrap leading-relaxed">
-              {mongo}
-            </pre>
-          </ScrollArea>
-        </TabsContent>
-      </Tabs>
+      <div className="flex-1 min-h-0 overflow-auto">
+        <pre style={{
+          margin: 0,
+          padding: "12px 16px",
+          fontFamily: "var(--font-jetbrains), monospace",
+          fontSize: 12,
+          lineHeight: "20px",
+          color: activeTab === "sql" ? "#22c55e" : "#a855f7",
+          whiteSpace: "pre",
+          minWidth: "max-content",
+        }}>
+          {activeContent}
+        </pre>
+      </div>
     </div>
   );
 }

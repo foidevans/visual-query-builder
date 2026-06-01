@@ -120,3 +120,16 @@ body {
 ::-webkit-scrollbar-thumb:hover { background: var(--border-bright); }
 
 ::selection { background: rgba(59, 130, 246, 0.25); color: var(--foreground); }
+
+
+[data-radix-popper-content-wrapper] > * {
+  background-color: var(--surface) !important;
+  border-color: var(--border) !important;
+}
+
+[role="menu"],
+[role="listbox"],
+[role="dialog"] {
+  background-color: var(--surface) !important;
+  border-color: var(--border) !important;
+}
