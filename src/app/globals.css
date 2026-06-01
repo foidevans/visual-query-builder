@@ -1,28 +1,72 @@
 @import "tailwindcss";
-@plugin "tailwindcss/plugin";
+
+@custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --ring: oklch(0.708 0 0);
+  --background: #f5f5f5;
+  --surface: #ffffff;
+  --surface-dim: #ebebeb;
+  --surface-low: #f0f0f0;
+  --surface-container: #e8e8e8;
+  --surface-high: #d4d4d4;
+  --surface-highest: #c4c4c4;
+  --on-surface: #1a1a1a;
+  --on-surface-variant: #4a4a5a;
+  --border: #e0e0e0;
+  --border-bright: #c0c0c0;
+  --primary: #2563eb;
+  --primary-dim: #1d4ed8;
+  --on-primary: #ffffff;
+  --logic-and: #2563eb;
+  --logic-or: #7c3aed;
+  --type-string: #16a34a;
+  --type-number: #ea580c;
+  --type-date: #2563eb;
+  --type-enum: #9333ea;
+  --type-boolean: #ca8a04;
+  --error: #dc2626;
+  --success: #16a34a;
+  --muted: #e8e8e8;
+  --muted-foreground: #6b7280;
+  --foreground: #1a1a1a;
+  --card: #ffffff;
+  --card-foreground: #1a1a1a;
+  --ring: #2563eb;
+  --input: #ffffff;
+  --radius: 0.25rem;
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --ring: oklch(0.439 0 0);
+  --background: #0f0f0f;
+  --surface: #1a1a1a;
+  --surface-dim: #131313;
+  --surface-low: #1c1b1b;
+  --surface-container: #201f1f;
+  --surface-high: #2a2a2a;
+  --surface-highest: #353534;
+  --on-surface: #e5e2e1;
+  --on-surface-variant: #c2c6d6;
+  --border: #2a2a2a;
+  --border-bright: #424754;
+  --primary: #3b82f6;
+  --primary-dim: #1d4ed8;
+  --on-primary: #ffffff;
+  --logic-and: #3b82f6;
+  --logic-or: #8b5cf6;
+  --type-string: #22c55e;
+  --type-number: #f97316;
+  --type-date: #3b82f6;
+  --type-enum: #a855f7;
+  --type-boolean: #eab308;
+  --error: #ef4444;
+  --success: #22c55e;
+  --muted: #2a2a2a;
+  --muted-foreground: #8c909f;
+  --foreground: #e5e2e1;
+  --card: #1a1a1a;
+  --card-foreground: #e5e2e1;
+  --ring: #3b82f6;
+  --input: #0e0e0e;
 }
 
 @theme inline {
@@ -35,4 +79,44 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-ring: var(--ring);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--on-primary);
+  --font-sans: var(--font-inter), sans-serif;
+  --font-mono: var(--font-jetbrains), monospace;
 }
+
+* {
+  border-color: var(--border);
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-inter), sans-serif;
+  font-size: 16px;
+  line-height: 20px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-mono, pre, code, kbd {
+  font-family: var(--font-jetbrains), monospace;
+}
+
+[data-slot="select-content"] {
+  background-color: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+[data-slot="select-item"]:focus,
+[data-slot="select-item"]:hover {
+  background-color: var(--surface-high) !important;
+}
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb { background: var(--surface-high); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border-bright); }
+
+::selection { background: rgba(59, 130, 246, 0.25); color: var(--foreground); }

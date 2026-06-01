@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useQueryStore } from "@/store/queryStore";
 import { useValidation } from "@/hooks/useValidation";
-import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { KeyboardShortcuts } from "./KeyboardShortcuts";
 import { QueryGroup } from "@/types/query";
 
@@ -33,8 +32,6 @@ export function QueryToolbar() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [presetName, setPresetName] = useState("");
   const [showPresetInput, setShowPresetInput] = useState(false);
-
-  useKeyboardShortcuts();
 
   function handleExport() {
     const payload = { query: rootGroup, schemaName: selectedSchema };
@@ -73,43 +70,57 @@ export function QueryToolbar() {
   }
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2 border-b border-border flex-wrap">
-      {/* Validation status */}
+    <div
+      className="flex items-center gap-1.5 px-3 py-2 border-b shrink-0"
+      style={{
+        borderColor: "var(--border)",
+        background: "var(--surface-dim)",
+        flexWrap: "wrap",
+        rowGap: 6,
+      }}
+    >
       {valid ? (
-        <Badge variant="outline" className="text-xs gap-1 text-emerald-400 border-emerald-400/30 bg-emerald-400/10">
+        <Badge variant="outline" className="text-xs gap-1 shrink-0"
+          style={{ color: "var(--success)", borderColor: "var(--success)", background: "transparent" }}>
           <CheckCircle2 size={10} />
           Valid
         </Badge>
       ) : (
-        <Badge variant="outline" className="text-xs gap-1 text-rose-400 border-rose-400/30 bg-rose-400/10">
+        <Badge variant="outline" className="text-xs gap-1 shrink-0"
+          style={{ color: "var(--error)", borderColor: "var(--error)", background: "transparent" }}>
           <AlertCircle size={10} />
           {visibleErrorCount > 0 ? `${visibleErrorCount} error${visibleErrorCount !== 1 ? "s" : ""}` : "Invalid"}
         </Badge>
       )}
 
-      <Separator orientation="vertical" className="h-5" />
+      <Separator orientation="vertical" className="h-4 shrink-0" />
 
-      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground" onClick={resetQuery}>
-        <RotateCcw size={12} />
-        Reset
+      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 shrink-0 px-2"
+        style={{ color: "var(--muted-foreground)" }} onClick={resetQuery}>
+        <RotateCcw size={11} /> Reset
       </Button>
 
-      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground" onClick={handleExport}>
-        <Download size={12} />
-        Export
+      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 shrink-0 px-2"
+        style={{ color: "var(--muted-foreground)" }} onClick={handleExport}>
+        <Download size={11} /> Export
       </Button>
 
-      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground" onClick={() => fileInputRef.current?.click()}>
-        <Upload size={12} />
-        Import
+      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 shrink-0 px-2"
+        style={{ color: "var(--muted-foreground)" }}
+        onClick={() => fileInputRef.current?.click()}>
+        <Upload size={11} /> Import
       </Button>
       <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
 
       {showPresetInput ? (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <input
             autoFocus
-            className="h-7 text-xs px-2 rounded-md border border-border bg-background w-36 outline-none focus:ring-1 focus:ring-ring"
+            className="h-7 text-xs px-2 rounded outline-none"
+            style={{
+              width: 120, background: "var(--input)",
+              border: "1px solid var(--border)", color: "var(--foreground)",
+            }}
             placeholder="Preset name..."
             value={presetName}
             onChange={(e) => setPresetName(e.target.value)}
@@ -118,21 +129,22 @@ export function QueryToolbar() {
               if (e.key === "Escape") setShowPresetInput(false);
             }}
           />
-          <Button size="sm" className="h-7 text-xs" onClick={handleSavePreset}>Save</Button>
+          <Button size="sm" className="h-7 text-xs px-2" onClick={handleSavePreset}>Save</Button>
         </div>
       ) : (
-        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground" onClick={() => setShowPresetInput(true)}>
-          <Save size={12} />
-          Save Preset
+        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 shrink-0 px-2"
+          style={{ color: "var(--muted-foreground)" }}
+          onClick={() => setShowPresetInput(true)}>
+          <Save size={11} /> Save Preset
         </Button>
       )}
 
       {presets.length > 0 && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground">
-              <BookMarked size={12} />
-              Presets <ChevronDown size={10} />
+            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 shrink-0 px-2"
+              style={{ color: "var(--muted-foreground)" }}>
+              <BookMarked size={11} /> Presets <ChevronDown size={9} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56">
@@ -143,10 +155,13 @@ export function QueryToolbar() {
                 <DropdownMenuItem key={preset.id} className="flex items-center justify-between group">
                   <button className="text-xs flex-1 text-left" onClick={() => loadPreset(preset.id)}>
                     {preset.name}
-                    <span className="block text-muted-foreground text-[10px]">{preset.schemaName}</span>
+                    <span className="block text-[10px]" style={{ color: "var(--muted-foreground)" }}>
+                      {preset.schemaName}
+                    </span>
                   </button>
                   <button
-                    className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-all"
+                    className="opacity-0 group-hover:opacity-100 transition-all"
+                    style={{ color: "var(--muted-foreground)", background: "transparent", border: "none" }}
                     onClick={(e) => { e.stopPropagation(); deletePreset(preset.id); }}
                   >
                     <Trash2 size={11} />
@@ -161,9 +176,9 @@ export function QueryToolbar() {
       {history.length > 0 && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 text-muted-foreground">
-              <History size={12} />
-              History <ChevronDown size={10} />
+            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 shrink-0 px-2"
+              style={{ color: "var(--muted-foreground)" }}>
+              <History size={11} /> History <ChevronDown size={9} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-64">
@@ -177,7 +192,7 @@ export function QueryToolbar() {
                   onClick={() => importQuery(entry.query, entry.schemaName)}
                 >
                   <span className="font-medium">{entry.schemaName}</span>
-                  <span className="text-muted-foreground text-[10px]">
+                  <span style={{ fontSize: 10, color: "var(--muted-foreground)" }}>
                     {new Date(entry.executedAt).toLocaleTimeString()} · {entry.resultCount} rows
                   </span>
                 </DropdownMenuItem>
@@ -187,7 +202,7 @@ export function QueryToolbar() {
         </DropdownMenu>
       )}
 
-      <div className="ml-auto">
+      <div className="ml-auto shrink-0">
         <KeyboardShortcuts />
       </div>
     </div>
