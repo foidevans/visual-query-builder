@@ -103,6 +103,17 @@ body {
   font-family: var(--font-jetbrains), monospace;
 }
 
+[data-slot="select-content"] {
+  background-color: var(--surface) !important;
+  border-color: var(--border) !important;
+  color: var(--foreground) !important;
+}
+
+[data-slot="select-item"]:focus,
+[data-slot="select-item"]:hover {
+  background-color: var(--surface-high) !important;
+}
+
 ::-webkit-scrollbar { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track { background: var(--background); }
 ::-webkit-scrollbar-thumb { background: var(--surface-high); border-radius: 3px; }

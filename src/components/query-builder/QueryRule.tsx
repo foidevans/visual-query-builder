@@ -36,7 +36,7 @@ function ValueInput({
     return (
       <Select
         value={typeof rule.value === "string" ? rule.value : ""}
-        onValueChange={(val) => { onTouch(); updateRule(rule.id, { value: val }); }}
+        onValueChange={(val: string) => { onTouch(); updateRule(rule.id, { value: val }); }}
       >
         <SelectTrigger className="h-7 text-xs" style={{ minWidth: 100, flex: 1 }}>
           <SelectValue placeholder="Select value" />
@@ -54,7 +54,7 @@ function ValueInput({
     return (
       <Select
         value={typeof rule.value === "string" ? rule.value : ""}
-        onValueChange={(val) => { onTouch(); updateRule(rule.id, { value: val }); }}
+        onValueChange={(val: string) => { onTouch(); updateRule(rule.id, { value: val }); }}
       >
         <SelectTrigger className="h-7 text-xs" style={{ minWidth: 100, flex: 1 }}>
           <SelectValue placeholder="Select" />
@@ -164,7 +164,7 @@ export const QueryRule = memo(function QueryRule({ rule, fields, groupId: _group
 
         <Select
           value={rule.operator}
-          onValueChange={(val) => { touchNode(rule.id); updateRule(rule.id, { operator: val as QueryRuleType["operator"], value: "" }); }}
+          onValueChange={(val: string) => { touchNode(rule.id); updateRule(rule.id, { operator: val as QueryRuleType["operator"], value: "" }); }}
           disabled={!selectedField}
         >
           <SelectTrigger className="h-7 text-xs" style={{ width: 130, flexShrink: 0 }}>

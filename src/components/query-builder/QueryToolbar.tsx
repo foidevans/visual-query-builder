@@ -70,49 +70,55 @@ export function QueryToolbar() {
   }
 
   return (
-    <div className="flex items-center gap-2 px-4 py-2 border-b flex-wrap shrink-0"
-      style={{ borderColor: "var(--border)", background: "var(--surface-dim)" }}>
-
+    <div
+      className="flex items-center gap-1.5 px-3 py-2 border-b shrink-0"
+      style={{
+        borderColor: "var(--border)",
+        background: "var(--surface-dim)",
+        flexWrap: "wrap",
+        rowGap: 6,
+      }}
+    >
       {valid ? (
-        <Badge variant="outline" className="text-xs gap-1"
+        <Badge variant="outline" className="text-xs gap-1 shrink-0"
           style={{ color: "var(--success)", borderColor: "var(--success)", background: "transparent" }}>
           <CheckCircle2 size={10} />
           Valid
         </Badge>
       ) : (
-        <Badge variant="outline" className="text-xs gap-1"
+        <Badge variant="outline" className="text-xs gap-1 shrink-0"
           style={{ color: "var(--error)", borderColor: "var(--error)", background: "transparent" }}>
           <AlertCircle size={10} />
           {visibleErrorCount > 0 ? `${visibleErrorCount} error${visibleErrorCount !== 1 ? "s" : ""}` : "Invalid"}
         </Badge>
       )}
 
-      <Separator orientation="vertical" className="h-5" />
+      <Separator orientation="vertical" className="h-4 shrink-0" />
 
-      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
+      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 shrink-0 px-2"
         style={{ color: "var(--muted-foreground)" }} onClick={resetQuery}>
-        <RotateCcw size={12} /> Reset
+        <RotateCcw size={11} /> Reset
       </Button>
 
-      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
+      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 shrink-0 px-2"
         style={{ color: "var(--muted-foreground)" }} onClick={handleExport}>
-        <Download size={12} /> Export
+        <Download size={11} /> Export
       </Button>
 
-      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
+      <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 shrink-0 px-2"
         style={{ color: "var(--muted-foreground)" }}
         onClick={() => fileInputRef.current?.click()}>
-        <Upload size={12} /> Import
+        <Upload size={11} /> Import
       </Button>
       <input ref={fileInputRef} type="file" accept=".json" className="hidden" onChange={handleImport} />
 
       {showPresetInput ? (
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-1 shrink-0">
           <input
             autoFocus
             className="h-7 text-xs px-2 rounded outline-none"
             style={{
-              width: 140, background: "var(--input)",
+              width: 120, background: "var(--input)",
               border: "1px solid var(--border)", color: "var(--foreground)",
             }}
             placeholder="Preset name..."
@@ -123,22 +129,22 @@ export function QueryToolbar() {
               if (e.key === "Escape") setShowPresetInput(false);
             }}
           />
-          <Button size="sm" className="h-7 text-xs" onClick={handleSavePreset}>Save</Button>
+          <Button size="sm" className="h-7 text-xs px-2" onClick={handleSavePreset}>Save</Button>
         </div>
       ) : (
-        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
+        <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 shrink-0 px-2"
           style={{ color: "var(--muted-foreground)" }}
           onClick={() => setShowPresetInput(true)}>
-          <Save size={12} /> Save Preset
+          <Save size={11} /> Save Preset
         </Button>
       )}
 
       {presets.length > 0 && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
+            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 shrink-0 px-2"
               style={{ color: "var(--muted-foreground)" }}>
-              <BookMarked size={12} /> Presets <ChevronDown size={10} />
+              <BookMarked size={11} /> Presets <ChevronDown size={9} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56">
@@ -170,9 +176,9 @@ export function QueryToolbar() {
       {history.length > 0 && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1"
+            <Button variant="ghost" size="sm" className="h-7 text-xs gap-1 shrink-0 px-2"
               style={{ color: "var(--muted-foreground)" }}>
-              <History size={12} /> History <ChevronDown size={10} />
+              <History size={11} /> History <ChevronDown size={9} />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-64">
@@ -196,7 +202,7 @@ export function QueryToolbar() {
         </DropdownMenu>
       )}
 
-      <div className="ml-auto">
+      <div className="ml-auto shrink-0">
         <KeyboardShortcuts />
       </div>
     </div>

@@ -52,7 +52,6 @@ export const QueryGroup = memo(function QueryGroup({
 
   return (
     <div className={cn("rounded-lg border-2 p-3 space-y-2 transition-all duration-200", borderColor)}>
-      {/* Group header */}
       <div className="flex items-center gap-2 flex-wrap">
         <button
           onClick={() => toggleGroupCollapsed(group.id)}
@@ -121,7 +120,6 @@ export const QueryGroup = memo(function QueryGroup({
         </div>
       </div>
 
-      {/* Children */}
       {!group.collapsed && (
         <SortableGroup groupId={group.id} childIds={childIds}>
           {group.children.map((child: QueryNode, index: number) => (

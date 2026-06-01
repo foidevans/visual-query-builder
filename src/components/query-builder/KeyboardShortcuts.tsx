@@ -34,7 +34,7 @@ export function KeyboardShortcuts() {
           Shortcuts
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-64">
+      <DropdownMenuContent align="end" className="w-64 bg-background border border-border shadow-lg">
         <DropdownMenuLabel className="text-xs">Keyboard Shortcuts</DropdownMenuLabel>
         <DropdownMenuSeparator />
         <div className="p-2 space-y-2">
