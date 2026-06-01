@@ -1,38 +1,39 @@
 "use client";
 
-import { Database } from "lucide-react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useEffect, useState } from "react";
+import { SplashScreen } from "@/components/SplashScreen";
+import { WelcomeModal } from "@/components/WelcomeModal";
+import { SettingsModal } from "@/components/SettingsModal";
+import { Navbar } from "@/components/Navbar";
 import { QueryBuilderShell } from "@/components/query-builder/QueryBuilderShell";
-import { ThemeToggle } from "@/components/query-builder/ThemeToggle";
-import { useQueryStore } from "@/store/queryStore";
-import { SCHEMAS } from "@/data/schemas";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 
 export default function Home() {
-  const { selectedSchema, setSelectedSchema, resetQuery } = useQueryStore();
+  const [splashDone, setSplashDone] = useState(false);
+  const [showWelcome, setShowWelcome] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+
+  useKeyboardShortcuts();
+
+  useEffect(() => {
+    if (splashDone) {
+      const seen = localStorage.getItem("requete-welcome-seen");
+      if (!seen) setShowWelcome(true);
+    }
+  }, [splashDone]);
 
   return (
-    <div className="min-h-screen bg-background text-foreground flex flex-col">
-      <header className="border-b border-border px-4 py-3 flex items-center gap-3 shrink-0">
-        <Database size={18} className="text-blue-400 shrink-0" />
-        <span className="font-semibold text-sm tracking-tight">Visual Query Builder</span>
-        <div className="flex-1" />
-        <Select
-          value={selectedSchema}
-          onValueChange={(val) => { setSelectedSchema(val); resetQuery(); }}
-        >
-          <SelectTrigger className="h-8 w-32 text-xs">
-            <SelectValue placeholder="Schema" />
-          </SelectTrigger>
-          <SelectContent>
-            {SCHEMAS.map((s) => (
-              <SelectItem key={s.name} value={s.name} className="text-xs">{s.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <ThemeToggle />
-      </header>
+    <>
+      {!splashDone && <SplashScreen onComplete={() => setSplashDone(true)} />}
 
-      <QueryBuilderShell />
-    </div>
+      <div className="h-screen flex flex-col overflow-hidden"
+        style={{ opacity: splashDone ? 1 : 0, transition: "opacity 400ms ease" }}>
+        <Navbar onSettingsClick={() => setShowSettings(true)} />
+        <QueryBuilderShell />
+      </div>
+
+      {showWelcome && <WelcomeModal onClose={() => setShowWelcome(false)} />}
+      {showSettings && <SettingsModal onClose={() => setShowSettings(false)} />}
+    </>
   );
 }

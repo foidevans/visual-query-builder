@@ -1,6 +1,6 @@
-# Visual Query Builder
+# Requête 
 
-A highly interactive visual query builder built with Next.js 15, TypeScript, and Tailwind CSS v4. Build complex database queries through a graphical interface — no raw SQL or MongoDB syntax required.
+Requête is a highly interactive visual query builder built with Next.js 15, TypeScript, and Tailwind CSS v4. Build complex database queries through a graphical interface — no raw SQL or MongoDB syntax required.
 
 **Live Demo:** [visual-query-builder-coral.vercel.app]
 
@@ -140,3 +140,27 @@ pnpm test:run
 ```bash
 pnpm run build
 ```
+
+
+
+export type NotificationPreferences = {
+  id: string;
+  userId: string;
+  emailFunnelReady: boolean;
+  emailStageUnlocked: boolean;
+  emailStageCompleted: boolean;
+  emailWeeklyDigest: boolean;
+  inappTaskCompleted: boolean;
+  inappStageUnlocked: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type UpdateNotificationPreferencesInput = {
+  email_funnel_ready?: boolean;
+  email_stage_unlocked?: boolean;
+  email_stage_completed?: boolean;
+  email_weekly_digest?: boolean;
+  inapp_task_completed?: boolean;
+  inapp_stage_unlocked?: boolean;
+};
