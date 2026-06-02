@@ -46,6 +46,11 @@ export const QueryGroup = memo(function QueryGroup({
     OR: "bg-violet-500/20 text-violet-400 hover:bg-violet-500/30 border-violet-500/30",
   };
 
+  const connectorColors = {
+    AND: "text-blue-400 bg-blue-500/10 border border-blue-500/30 hover:bg-blue-500/20",
+    OR: "text-violet-400 bg-violet-500/10 border border-violet-500/30 hover:bg-violet-500/20",
+  };
+
   const borderColor = depthColors[depth % depthColors.length];
   const childIds = group.children.map((c) => c.id);
   const isOnly = group.children.length === 1;
@@ -64,12 +69,14 @@ export const QueryGroup = memo(function QueryGroup({
         <Badge
           variant="outline"
           className={cn(
-            "cursor-pointer select-none text-xs font-bold px-2 py-0.5 transition-colors",
+            "cursor-pointer select-none text-xs font-bold px-2 py-0.5 transition-colors gap-1",
             logicalBadgeColors[group.logicalOperator]
           )}
           onClick={() => toggleLogicalOperator(group.id)}
+          title="Click to toggle between AND / OR"
         >
           {group.logicalOperator}
+          <span style={{ fontSize: 8, opacity: 0.7 }}>▼</span>
         </Badge>
 
         {depth > 0 && (
@@ -127,16 +134,16 @@ export const QueryGroup = memo(function QueryGroup({
               {index > 0 && (
                 <div className="flex items-center gap-2 my-1 pl-1">
                   <div className="h-px flex-1 bg-border" />
-                  <span
+                  <button
+                    onClick={() => toggleLogicalOperator(group.id)}
+                    title="Click to toggle between AND / OR"
                     className={cn(
-                      "text-xs font-semibold px-1.5 py-0.5 rounded",
-                      group.logicalOperator === "AND"
-                        ? "text-blue-400 bg-blue-500/10"
-                        : "text-violet-400 bg-violet-500/10"
+                      "text-xs font-semibold px-2 py-0.5 rounded cursor-pointer transition-colors",
+                      connectorColors[group.logicalOperator]
                     )}
                   >
                     {group.logicalOperator}
-                  </span>
+                  </button>
                   <div className="h-px flex-1 bg-border" />
                 </div>
               )}
