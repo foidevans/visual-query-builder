@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Database, Eye, Play } from "lucide-react";
 import { QueryGroup } from "@/components/query-builder/QueryGroup";
@@ -24,8 +23,8 @@ export function QueryBuilderShell() {
     return (
       <div className="flex-1 flex items-center justify-center">
         <div className="flex flex-col items-center gap-3">
-          <Database size={28} style={{ color: "#3b82f6" }} className="animate-pulse" />
-          <p style={{ fontFamily: "Inter", fontSize: 13, color: "#8c909f" }}>Loading workspace...</p>
+          <Database size={28} style={{ color: "var(--primary)" }} className="animate-pulse" />
+          <p style={{ fontSize: 13, color: "var(--muted-foreground)" }}>Loading workspace...</p>
         </div>
       </div>
     );
@@ -33,33 +32,39 @@ export function QueryBuilderShell() {
 
   return (
     <>
-      <div className="hidden lg:flex flex-1 overflow-hidden">
+      <div className="hidden lg:flex flex-1 min-h-0">
+
         {schema && <SchemaSidebar fields={schema.fields} schemaName={schema.label} />}
 
-        <div className="flex flex-col flex-1 overflow-hidden" style={{ borderRight: "1px solid #2a2a2a" }}>
+        <div className="flex flex-col flex-1 min-h-0 min-w-0"
+          style={{ borderRight: "1px solid var(--border)" }}>
           <QueryToolbar />
-          <ScrollArea className="flex-1 p-4">
+          <div className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden"
+            style={{ padding: 16 }}>
             {schema && (
               <QueryGroup group={rootGroup} fields={schema.fields} depth={0} isRoot />
             )}
-          </ScrollArea>
+          </div>
         </div>
 
-        <div className="flex flex-col overflow-hidden" style={{ width: 380, flexShrink: 0 }}>
-          <div className="flex-1 overflow-hidden p-4 pb-2">
+        <div className="flex flex-col min-h-0"
+          style={{ width: 380, flexShrink: 0 }}>
+          <div className="flex-1 min-h-0 overflow-hidden" style={{ padding: "16px 16px 8px" }}>
             <QueryPreview />
           </div>
-          <div className="flex-1 overflow-hidden p-4 pt-2">
+          <div className="flex-1 min-h-0 overflow-hidden" style={{ padding: "8px 16px 16px" }}>
             <ResultsPanel />
           </div>
         </div>
       </div>
 
-      <div className="flex lg:hidden flex-col flex-1 overflow-hidden">
+      <div className="flex lg:hidden flex-col flex-1 min-h-0">
         <QueryToolbar />
-        <Tabs value={mobileTab} onValueChange={setMobileTab} className="flex flex-col flex-1 overflow-hidden">
-          <TabsList className="w-full rounded-none border-b bg-transparent justify-start px-4 gap-2 h-10 shrink-0"
-            style={{ borderColor: "#2a2a2a" }}>
+        <Tabs value={mobileTab} onValueChange={setMobileTab}
+          className="flex flex-col flex-1 min-h-0">
+          <TabsList
+            className="w-full rounded-none border-b bg-transparent justify-start px-4 gap-2 h-10 shrink-0"
+            style={{ borderColor: "var(--border)" }}>
             <TabsTrigger value="builder" className="text-xs gap-1.5">
               <Database size={12} /> Builder
             </TabsTrigger>
@@ -70,15 +75,20 @@ export function QueryBuilderShell() {
               <Play size={12} /> Results
             </TabsTrigger>
           </TabsList>
-          <TabsContent value="builder" className="flex-1 overflow-hidden m-0">
-            <ScrollArea className="h-full p-4">
-              {schema && <QueryGroup group={rootGroup} fields={schema.fields} depth={0} isRoot />}
-            </ScrollArea>
+
+          <TabsContent value="builder" className="flex-1 min-h-0 m-0">
+            <div className="h-full overflow-y-auto overflow-x-hidden" style={{ padding: 16 }}>
+              {schema && (
+                <QueryGroup group={rootGroup} fields={schema.fields} depth={0} isRoot />
+              )}
+            </div>
           </TabsContent>
-          <TabsContent value="preview" className="flex-1 overflow-hidden m-0 p-4">
+
+          <TabsContent value="preview" className="flex-1 min-h-0 m-0" style={{ padding: 16 }}>
             <QueryPreview />
           </TabsContent>
-          <TabsContent value="results" className="flex-1 overflow-hidden m-0 p-4">
+
+          <TabsContent value="results" className="flex-1 min-h-0 m-0" style={{ padding: 16 }}>
             <ResultsPanel />
           </TabsContent>
         </Tabs>
